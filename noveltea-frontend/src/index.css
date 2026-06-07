@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Fraunces", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+
+  --color-tea-50: #fbf7f2;
+  --color-tea-100: #f6ecdf;
+  --color-tea-200: #ead8c2;
+  --color-tea-300: #dbbe9f;
+  --color-tea-400: #ca9f77;
+  --color-tea-500: #ba8153;
+  --color-tea-600: #a5673d;
+  --color-tea-700: #885030;
+  --color-tea-800: #6d3e26;
+  --color-tea-900: #552f1e;
+  --color-tea-950: #30170d;
+  
+  --color-amber-gold: #d4af37;
+  --color-vintage-paper: #f4edd8;
+  --color-dark-parchment: #22120b;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-tea-50);
+  color: var(--color-tea-950);
+  background-image: 
+    radial-gradient(var(--color-tea-100) 1px, transparent 0),
+    radial-gradient(var(--color-tea-100) 1px, transparent 0);
+  background-size: 40px 40px;
+  background-position: 0 0, 20px 20px;
+  background-attachment: fixed;
+}
+
+h1, h2, h3, .font-vintage {
+  font-family: var(--font-serif);
+}
+
+/* Custom Scrollbar for Vintage feel */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-tea-50);
+  border-left: 1px solid var(--color-tea-200);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-tea-300);
+  border-radius: 5px;
+  border: 2px solid var(--color-tea-50);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-tea-400);
+}
+
+/* Glassmorphism Vintage Card style */
+.vintage-glass {
+  background: rgba(251, 247, 242, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(234, 216, 194, 0.6);
+}
+
+.vintage-glass-dark {
+  background: rgba(48, 23, 13, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(136, 80, 48, 0.3);
+}
+
+.vintage-border {
+  border: 2px solid var(--color-tea-800);
+  box-shadow: 0px 4px 0px var(--color-tea-900);
+}
+
+.vintage-shadow {
+  box-shadow: 0 10px 30px -10px rgba(85, 47, 30, 0.15);
+}
+
+.vintage-shadow-premium {
+  box-shadow: 0 20px 40px -15px rgba(48, 23, 13, 0.25), 0 0 0 1px rgba(186, 129, 83, 0.15);
+}
+
+.glow-amber {
+  box-shadow: 0 0 20px rgba(186, 129, 83, 0.2);
+}
+
+
+/* Mobile sidebar slide-in */
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+/* Spinner for loading state */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 0.8s linear infinite;
+}

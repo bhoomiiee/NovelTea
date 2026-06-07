@@ -1,0 +1,18 @@
+# Environment secrets
+.env
+noveltea-backend/.env
+
+# Dependencies
+noveltea-backend/node_modules
+noveltea-frontend/node_modules
+
+# Build output
+noveltea-frontend/dist
+
+# Uploaded files
+noveltea-backend/uploads/*
+!noveltea-backend/uploads/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
