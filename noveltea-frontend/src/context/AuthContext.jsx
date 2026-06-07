@@ -3,12 +3,21 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
+// Resolve backend base URL at runtime
+const getBase = () => {
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  if (typeof window !== 'undefined' && window.location.hostname.includes('onrender.com')) {
+    return 'https://noveltea.onrender.com';
+  }
+  return '';
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [loading, setLoading] = useState(true);
 
-  const API_URL = '/api/auth';
+  const API_URL = `${getBase()}/api/auth`;
 
   useEffect(() => {
     const fetchUser = async () => {
