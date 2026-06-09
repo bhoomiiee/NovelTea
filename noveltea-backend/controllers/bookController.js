@@ -3,35 +3,63 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 
-// Ensure uploads directory exists (critical on Render where it may not persist)
+// ── Cloudinary setup (used when env vars are present) ─────────────────────
+let cloudinaryStorage = null;
+let useCloudinary = false;
+
+if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+  try {
+    const cloudinary = require('cloudinary').v2;
+    const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key:    process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+
+    cloudinaryStorage = new CloudinaryStorage({
+      cloudinary,
+      params: {
+        folder: 'noveltea-books',
+        resource_type: 'raw',   // PDFs are raw files
+        format: 'pdf',
+        use_filename: true,
+        unique_filename: true,
+      },
+    });
+
+    useCloudinary = true;
+    console.log('✓ Cloudinary storage enabled');
+  } catch (e) {
+    console.warn('Cloudinary init failed, falling back to disk:', e.message);
+  }
+}
+
+// ── Disk storage fallback (local dev) ─────────────────────────────────────
 const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
-// Configure Multer storage
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    cb(null, UPLOADS_DIR);
-  },
+const diskStorage = multer.diskStorage({
+  destination(req, file, cb) { cb(null, UPLOADS_DIR); },
   filename(req, file, cb) {
     cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
   },
 });
 
+// ── Multer instance ────────────────────────────────────────────────────────
 const upload = multer({
-  storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB
+  storage: useCloudinary ? cloudinaryStorage : diskStorage,
+  limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter(req, file, cb) {
-    if (file.mimetype === 'application/pdf') {
-      cb(null, true);
-    } else {
-      cb(new Error('Only PDFs are allowed'));
-    }
+    if (file.mimetype === 'application/pdf') cb(null, true);
+    else cb(new Error('Only PDFs are allowed'));
   },
 });
 
-// Middleware — wrap multer for Express 5 compatibility
+// Middleware — Express 5 compatible error handling
 exports.uploadPDF = (req, res, next) => {
   upload.single('pdf')(req, res, (err) => {
     if (err instanceof multer.MulterError) {
@@ -44,6 +72,8 @@ exports.uploadPDF = (req, res, next) => {
   });
 };
 
+// ── Controllers ───────────────────────────────────────────────────────────
+
 // @desc    Upload a new book
 // @route   POST /api/books
 // @access  Private
@@ -55,8 +85,14 @@ exports.uploadBook = async (req, res) => {
 
     const { title, author, genre } = req.body;
 
-    // Normalize path for both Windows (local) and Linux (Render)
-    const fileUrl = '/uploads/' + path.basename(req.file.path);
+    // Cloudinary gives req.file.path as the full HTTPS URL
+    // Disk storage gives a local file path
+    let fileUrl;
+    if (useCloudinary && req.file.path && req.file.path.startsWith('http')) {
+      fileUrl = req.file.path; // full Cloudinary URL
+    } else {
+      fileUrl = '/uploads/' + path.basename(req.file.path);
+    }
 
     const book = await Book.create({
       title: title || req.file.originalname,

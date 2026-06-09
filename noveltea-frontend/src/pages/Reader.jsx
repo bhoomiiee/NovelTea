@@ -325,7 +325,7 @@ const Reader = () => {
         }}
       >
         <Document
-          file={`${API}${book?.fileUrl}`}
+          file={book?.fileUrl?.startsWith('http') ? book.fileUrl : `${API}${book?.fileUrl}`}
           onLoadSuccess={onDocumentLoadSuccess}
           loading={
             <div className={`flex items-center justify-center mt-32 text-lg ${subtext}`}>Rendering PDF...</div>
