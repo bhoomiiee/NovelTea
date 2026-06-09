@@ -108,19 +108,23 @@ const Reader = () => {
   };
 
   // ── Text selection → highlight panel ──────────────────────────────────
+  // Works on both mouse (desktop) and touch (mobile)
   const handleTextSelection = () => {
-    const selection = window.getSelection();
-    const text = selection?.toString().trim();
-    if (text && text.length > 2) {
-      setSelectedText(text);
-      setHighlightCategory('General');
-      setHighlightMsg('');
-      setShowHighlightPanel(true);
-      // Single word → also show dictionary lookup
-      if (text.split(' ').length === 1) {
-        openLookup(text);
+    // Small delay to let the browser finalize the selection on touch
+    setTimeout(() => {
+      const selection = window.getSelection();
+      const text = selection?.toString().trim();
+      if (text && text.length > 2) {
+        setSelectedText(text);
+        setHighlightCategory('General');
+        setHighlightMsg('');
+        setShowHighlightPanel(true);
+        // Single word → also show dictionary lookup
+        if (text.split(' ').length === 1) {
+          openLookup(text);
+        }
       }
-    }
+    }, 100);
   };
 
   const handleSaveHighlight = async () => {
@@ -252,6 +256,8 @@ const Reader = () => {
             <h2 className={`font-bold text-sm ${text}`}>{book?.title}</h2>
             <p className={`text-xs ${subtext}`}>{book?.author}</p>
           </div>
+          {/* Mobile: show truncated title */}
+          <h2 className={`sm:hidden font-bold text-xs max-w-[80px] truncate ${text}`}>{book?.title}</h2>
         </div>
 
         <div className={`flex items-center gap-1 text-sm font-medium ${dm ? 'text-[#d4a867]' : 'text-[var(--color-tea-800)]'}`}>
@@ -270,10 +276,10 @@ const Reader = () => {
         </div>
 
         <div className="flex items-center gap-1">
-          {/* Zoom */}
-          <div className={`hidden sm:flex items-center gap-1 ${dm ? 'bg-[#3d2e18]' : 'bg-[var(--color-tea-50)]'} rounded-lg p-1 mr-1`}>
+          {/* Zoom — visible on all screens */}
+          <div className={`flex items-center gap-1 ${dm ? 'bg-[#3d2e18]' : 'bg-[var(--color-tea-50)]'} rounded-lg p-1 mr-1`}>
             <button onClick={() => changeScale(-0.1)} className={`p-1.5 rounded-md transition-colors ${btn}`}><ZoomOut size={16} /></button>
-            <span className={`text-xs font-bold min-w-[3rem] text-center ${dm ? 'text-[#d4a867]' : 'text-[var(--color-tea-800)]'}`}>{Math.round(scale * 100)}%</span>
+            <span className={`text-xs font-bold min-w-[2.5rem] text-center ${dm ? 'text-[#d4a867]' : 'text-[var(--color-tea-800)]'}`}>{Math.round(scale * 100)}%</span>
             <button onClick={() => changeScale(0.1)} className={`p-1.5 rounded-md transition-colors ${btn}`}><ZoomIn size={16} /></button>
           </div>
 
@@ -309,6 +315,7 @@ const Reader = () => {
       <div
         className="flex-1 overflow-auto flex justify-center items-start py-8 px-4"
         onMouseUp={handleTextSelection}
+        onTouchEnd={handleTextSelection}
         onDoubleClick={(e) => {
           const selection = window.getSelection();
           const word = selection?.toString().trim();
@@ -381,8 +388,8 @@ const Reader = () => {
 
       {/* ── Highlight / Quote Panel ───────────────────────────────────── */}
       {showHighlightPanel && (
-        <div className="fixed inset-0 z-40 bg-black/40 flex items-end sm:items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md border border-[var(--color-tea-100)] p-6">
+        <div className="fixed inset-0 z-40 bg-black/40 flex items-end justify-center p-0 sm:p-4 sm:items-center">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-md border border-[var(--color-tea-100)] p-6 max-h-[85vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-[var(--color-tea-950)] flex items-center gap-2">
                 <Quote size={18} className="text-[var(--color-tea-600)]" /> Save Quote
@@ -437,8 +444,8 @@ const Reader = () => {
 
       {/* ── Bookmark Panel ────────────────────────────────────────────── */}
       {showBookmarkPanel && (
-        <div className="fixed inset-0 z-40 bg-black/40 flex items-end sm:items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md border border-[var(--color-tea-100)] p-6">
+        <div className="fixed inset-0 z-40 bg-black/40 flex items-end justify-center p-0 sm:p-4 sm:items-center">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-md border border-[var(--color-tea-100)] p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-[var(--color-tea-950)] flex items-center gap-2">
                 <Bookmark size={18} className="text-[var(--color-tea-600)]" /> Bookmark Page {pageNumber}
@@ -515,7 +522,7 @@ const Reader = () => {
 
       {/* ── Dictionary Lookup Panel ───────────────────────────────────── */}
       {showLookup && (
-        <div className="fixed bottom-24 right-6 z-50 w-80 bg-white rounded-3xl shadow-2xl border border-[var(--color-tea-100)] overflow-hidden">
+        <div className="fixed bottom-20 left-2 right-2 sm:left-auto sm:right-6 sm:w-80 z-50 bg-white rounded-3xl shadow-2xl border border-[var(--color-tea-100)] overflow-hidden">
           <div className="flex justify-between items-center px-5 py-4 border-b border-[var(--color-tea-100)]">
             <h3 className="font-bold text-[var(--color-tea-950)] capitalize">{lookupWord}</h3>
             <button onClick={() => setShowLookup(false)} className="p-1 rounded-full hover:bg-[var(--color-tea-50)] text-[var(--color-tea-500)]"><X size={16} /></button>
