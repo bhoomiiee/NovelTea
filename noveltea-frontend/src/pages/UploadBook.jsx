@@ -20,6 +20,7 @@ const UploadBook = () => {
   const [genre, setGenre] = useState('');
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState(null);
 
   const { token } = useContext(AuthContext);
@@ -47,6 +48,7 @@ const UploadBook = () => {
 
     setLoading(true);
     setError(null);
+    setUploadProgress(0);
 
     const formData = new FormData();
     formData.append('title', title);
@@ -59,6 +61,10 @@ const UploadBook = () => {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
+        },
+        onUploadProgress: (e) => {
+          const pct = Math.round((e.loaded * 100) / e.total);
+          setUploadProgress(pct);
         },
       };
 
@@ -176,11 +182,23 @@ const UploadBook = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-4 mt-6 rounded-xl font-bold shadow-md transition-colors flex justify-center items-center gap-2 ${
-                loading ? 'bg-[var(--color-tea-400)] text-[var(--color-tea-100)]' : 'bg-[var(--color-tea-800)] text-white hover:bg-[var(--color-tea-900)]'
+              className={`w-full py-4 mt-6 rounded-xl font-bold shadow-md transition-colors flex justify-col items-center gap-2 overflow-hidden relative ${
+                loading ? 'bg-[var(--color-tea-300)] text-[var(--color-tea-100)] cursor-not-allowed' : 'bg-[var(--color-tea-800)] text-white hover:bg-[var(--color-tea-900)]'
               }`}
             >
-              {loading ? 'Uploading...' : 'Add to Bookshelf'}
+              {loading && (
+                <div
+                  className="absolute left-0 top-0 h-full bg-[var(--color-tea-600)] transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              )}
+              <span className="relative z-10 flex items-center justify-center gap-2 w-full">
+                {loading ? (
+                  uploadProgress < 100
+                    ? `Uploading... ${uploadProgress}%`
+                    : 'Saving to library...'
+                ) : 'Add to Bookshelf'}
+              </span>
             </button>
           </form>
         </motion.div>
