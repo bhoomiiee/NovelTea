@@ -60,6 +60,7 @@ const UploadBook = () => {
       cloudForm.append('upload_preset', UPLOAD_PRESET);
       cloudForm.append('folder', 'noveltea-books');
       cloudForm.append('resource_type', 'raw');
+      cloudForm.append('access_mode', 'public');
 
       const cloudRes = await axios.post(
         `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/raw/upload`,
