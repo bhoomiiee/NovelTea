@@ -74,7 +74,29 @@ exports.uploadPDF = (req, res, next) => {
 
 // ── Controllers ───────────────────────────────────────────────────────────
 
-// @desc    Upload a new book
+// @desc    Register a book with a pre-uploaded Cloudinary URL (fast path)
+// @route   POST /api/books/register
+// @access  Private
+exports.registerBook = async (req, res) => {
+  try {
+    const { title, author, genre, fileUrl } = req.body;
+    if (!fileUrl) return res.status(400).json({ message: 'fileUrl is required' });
+
+    const book = await Book.create({
+      title: title || 'Untitled',
+      author: author || 'Unknown',
+      genre: genre || 'General',
+      fileUrl,
+      uploadedBy: req.user._id,
+    });
+
+    res.status(201).json(book);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Upload a new book (legacy — file goes through backend)
 // @route   POST /api/books
 // @access  Private
 exports.uploadBook = async (req, res) => {
