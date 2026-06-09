@@ -16,7 +16,7 @@ const GENRES = [
 
 // Cloudinary config — direct browser upload (fast, no server bottleneck)
 const CLOUD_NAME = 'dwmdlrxm9';
-const UPLOAD_PRESET = 'noveltea_unsigned'; // create this in Cloudinary → Settings → Upload → Upload Presets → Add (Unsigned)
+const UPLOAD_PRESET = 'noveltea'; // Cloudinary unsigned upload preset
 
 const UploadBook = () => {
   const [title, setTitle] = useState('');
